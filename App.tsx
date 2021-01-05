@@ -15,7 +15,22 @@ const testPermissions = async () => {
   }
 };
 
-const fetchCircles = async (data: FormData) => {
+interface PickerPhoto {
+  uri: string;
+  fileName: string;
+  type: string;
+}
+
+const fetchCircles = async (photo: PickerPhoto) => {
+  const data = new FormData();
+  data.append('image', {
+    name: photo.fileName,
+    type: photo.type,
+    uri:
+      Platform.OS === 'android' ? photo.uri : photo.uri.replace('file://', ''),
+  });
+  data.append('image', 'true');
+
   await fetch('https://ai-tonometry.com/api/v1/circles/', {
     method: 'POST',
     headers: {
@@ -26,12 +41,6 @@ const fetchCircles = async (data: FormData) => {
     .then((res) => res.json())
     .then((res) => console.log(res));
 };
-
-interface PickerPhoto {
-  uri: string;
-  fileName: string;
-  type: string;
-}
 
 const App = () => {
   useEffect(() => {
@@ -44,17 +53,7 @@ const App = () => {
           },
         },
         async (photo: PickerPhoto) => {
-          const data = new FormData();
-          data.append('image', {
-            name: photo.fileName,
-            type: photo.type,
-            uri:
-              Platform.OS === 'android'
-                ? photo.uri
-                : photo.uri.replace('file://', ''),
-          });
-          data.append('image', 'true');
-          await fetchCircles(data);
+          await fetchCircles(photo);
         },
       );
     });
